@@ -1,5 +1,5 @@
 <h1 align="center">
-  Amazon Kinesis Video Streams CPP Producer, GStreamer Plugin and JNI
+  Amazon Kinesis Video Streams CPP Producer, GStreamer Plugin and JNI (fork)
   <br>
 </h1>
 
