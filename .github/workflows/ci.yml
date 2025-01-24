@@ -93,19 +93,26 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v3
-      - name: Move repository
-        run: |
-          mkdir C:\producer
-          Move-Item -Path "D:\a\amazon-kinesis-video-streams-producer-sdk-cpp\amazon-kinesis-video-streams-producer-sdk-cpp\*" -Destination "D:\producer"
-      - name: Install dependencies
+      - name: Set up dependencies
         run: |
           choco install nasm strawberryperl
           choco install gstreamer --version=1.22.8
           choco install gstreamer-devel --version=1.22.8
       - name: Build repository
         run: |
-          $env:Path += ';C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\Strawberry\c\bin;C:\Program Files\NASM;D:\producer\open-source\local\lib;D:\producer\open-source\local\bin'
+          $env:Path += ';C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\Strawberry\c\bin;C:\Program Files\NASM;C:\gstreamer\1.0\x86_64\bin'
           git config --system core.longpaths true
-          cd D:\producer
-          dir
-          .\build_windows.bat
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_TEST=TRUE -DBUILD_GSTREAMER_PLUGIN=TRUE -DBUILD_JNI=TRUE
+          cmake --build . --config Release
+      - name: Archive and upload DLLs
+        run: |
+          mkdir -p D:\artifacts
+          copy build\Release\*.dll D:\artifacts
+        # Upload as a GitHub Actions artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-dlls
+          path: D:\artifacts\*.dll
